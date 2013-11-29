@@ -9,6 +9,7 @@
       // Setup
       var link      = e.currentTarget;
       var assoc     = $(link).data('association');                // Name of child
+      var skipTriggers  = $(link).data('skip-triggers');            // don't trigger fieldAdded events
       var blueprint = $('#' + $(link).data('blueprint-id'));
       var content   = blueprint.data('blueprint');                // Fields template
 
@@ -49,10 +50,13 @@
       content     = $.trim(content.replace(regexp, new_id));
 
       var field = this.insertFields(content, assoc, link);
-      // bubble up event upto document (through form)
-      field
-        .trigger({ type: 'nested:fieldAdded', field: field })
-        .trigger({ type: 'nested:fieldAdded:' + assoc, field: field });
+
+      if ( !skipTriggers ) {
+        // bubble up event upto document (through form)
+        field
+          .trigger({ type: 'nested:fieldAdded', field: field })
+          .trigger({ type: 'nested:fieldAdded:' + assoc, field: field });
+      }
       return false;
     },
     newId: function() {
@@ -69,13 +73,13 @@
     removeFields: function(e) {
       var $link = $(e.currentTarget),
           assoc = $link.data('association'); // Name of child to be removed
-      
+
       var hiddenField = $link.prev('input[type=hidden]');
       hiddenField.val('1');
-      
+
       var field = $link.closest('.fields');
       field.hide();
-      
+
       field
         .trigger({ type: 'nested:fieldRemoved', field: field })
         .trigger({ type: 'nested:fieldRemoved:' + assoc, field: field });
